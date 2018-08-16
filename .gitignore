@@ -29,6 +29,7 @@ tmp/
 
 # Visual Studio 2015 cache/options directory
 .vs/
+.vscode/
 /wwwroot/dist/
 /ClientApp/dist/
 
@@ -236,3 +237,4 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
