@@ -1,16 +1,15 @@
-﻿using System;
-using System.Reflection;
-using System.Linq;
+using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace Utils.Logging
 {
-    public class DebugLogger : ILogger
+    public sealed class DebugLogger : ILogger
     {
-        private readonly string categoryName;
+        private readonly string _categoryName;
 
-        public DebugLogger(string categoryName) => this.categoryName = categoryName;
+        public DebugLogger(string categoryName) => _categoryName = categoryName;
 
         public bool IsEnabled(LogLevel logLevel) => true;
 
@@ -21,14 +20,15 @@ namespace Utils.Logging
             Exception exception,
             Func<TState, Exception, string> formatter)
         {
-            Debug.WriteLine($"{DateTime.Now.ToString("o")} {logLevel} {eventId.Id} {this.categoryName}");
-            Debug.WriteLine(formatter(state, exception));
+            Debug.WriteLine($"{DateTime.Now.ToString("o", CultureInfo.InvariantCulture)} {logLevel} {eventId.Id} {_categoryName}");
+            if(formatter != null)
+                Debug.WriteLine(formatter(state, exception));
         }
 
         public IDisposable BeginScope<TState>(TState state) => null;
     }
 
-    public class TraceLoggerProvider : ILoggerProvider
+    public sealed class TraceLoggerProvider : ILoggerProvider
     {
         public ILogger CreateLogger(string categoryName) => new DebugLogger(categoryName);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 
-namespace Utils.Extensions
+namespace Utils
 {
     internal static class StringExtensions
     {
@@ -31,12 +31,8 @@ namespace Utils.Extensions
         }
 
 
-        public static string ToSafeFilename(this string path, string replacement = "_")
-        {
+        public static string ToSafeFilename(this string path, string replacement = "_") => string.Join(replacement, path.Split(Path.GetInvalidFileNameChars()));
 
-            return string.Join(replacement, path.Split(Path.GetInvalidFileNameChars()));
-
-        }
     }
 
 
