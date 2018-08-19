@@ -31,7 +31,7 @@ namespace Utils.Extensions
         }
 
 
-        public static string ToSafeFilename(this string path, string replacement="_")
+        public static string ToSafeFilename(this string path, string replacement = "_")
         {
 
             return string.Join(replacement, path.Split(Path.GetInvalidFileNameChars()));
