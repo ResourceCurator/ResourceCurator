@@ -32,9 +32,9 @@ namespace ResourceCurator
         public ICuratorPipelineBuilder AddPipeline(string name)
         {
             if (_config.ServiceProvider == null)
-                throw new ArgumentNullException($"Setup service provider isn't setted. Call '{nameof(UseServiceProvider)}' first", nameof(_config.ServiceProvider));
+                throw new InvalidOperationException($"Setup service provider isn't setted. Call '{nameof(UseServiceProvider)}' first");
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name of pipeline can't be empty or whitespace", nameof(name));
+                throw new ArgumentNullException(nameof(name), "Name of pipeline can't be empty or whitespace");
 
             var pipeline = new CuratorPipeline(name);
             _config.AddPipeline(pipeline);

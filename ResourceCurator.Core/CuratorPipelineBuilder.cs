@@ -54,7 +54,13 @@ namespace ResourceCurator
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+
+            // Analyzer bug
+#pragma warning disable CA1062 // Validate arguments of public methods
             return builder.Task(next => { action(); return ctx => next(ctx); });
+#pragma warning restore CA1062 // Validate arguments of public methods
         }
         public static ICuratorPipelineBuilder Task(this ICuratorPipelineBuilder builder, Type middlewareTaskType)
         {

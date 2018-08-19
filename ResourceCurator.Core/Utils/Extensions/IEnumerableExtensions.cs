@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
-namespace Utils.Extensions
+namespace Utils
 {
     public static class IEnumerableExtensions
     {
@@ -14,10 +14,7 @@ namespace Utils.Extensions
         /// Obtains the data as a list; if it is *already* a list, the original object is returned without
         /// any duplication; otherwise, ToList() is invoked.
         /// </summary>
-        public static List<T> AsList<T>(this IEnumerable<T> source)
-        {
-            return (source == null || source is List<T>) ? (List<T>) source : source.ToList();
-        }
+        public static List<T> AsList<T>(this IEnumerable<T> source) => source is List<T> list ? list : source?.ToList();
 
     }
 
