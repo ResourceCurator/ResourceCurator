@@ -4,27 +4,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Security.Cryptography;
 
 namespace ResourceCurator
 {
-    public interface IResource
-    {
-        string Name { get; }
-        object UntypedValue { get; }
-    }
-
-    public interface IResource<T> : IResource
-    {
-        T Value { get; }
-    }
-
     public abstract class Resource<T> : IResource<T>, IEquatable<Resource<T>>
     {
-        protected Resource(T value) => Value = value;
+        protected Resource(string producerHash, T value) =>
+            (ProducerHash, Value) = (producerHash ?? throw new ArgumentNullException(nameof(producerHash), "Producer hash must be setted"), value);
 
         public abstract string Name { get; }
         public T Value { get; protected set; }
         public object UntypedValue => Value;
+        public string ProducerHash { get; protected set; }
 
         #region Equals + GetHashCode
 
@@ -46,15 +38,6 @@ namespace ResourceCurator
         #endregion Equals + GetHashCode
 
         public override string ToString() => "Name " + Name ?? "null" + " Value: " + Value ?? "null";
-        
-    }
-    public interface IResourceProducer
-    {
-        Task StartAsync(CancellationToken cancellationToken);
-    }
 
-    public interface IResourceProducer<T> : IResourceProducer where T: IResource
-    {
-        IObservable<T> Resource { get; }
     }
 }

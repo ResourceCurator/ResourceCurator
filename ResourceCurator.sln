@@ -10,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CEE37EB9-6B0C-4C86-9370-4222235645D1}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		docs\Notes.md = docs\Notes.md
+		Readme.md = Readme.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PingPipeline", "Examples\PingPipeline\PingPipeline.csproj", "{9CFD3FC7-C293-4915-A5F4-B54FB3A9F9A2}"

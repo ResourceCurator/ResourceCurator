@@ -1,12 +1,148 @@
 using System;
 using System.Net.Http;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ResourceCurator;
+using ObservableExtensions = ResourceCurator.ObservableExtensions;
 
 namespace Example
 {
+
+
+    internal class Program
+    {
+        public static void Main(string[] args)
+        {
+            var serviceCollection = new ServiceCollection()
+                                        .AddHttpClient()
+                                        .AddScheduler()
+                                        .AddSingleton<ISerializer, YamlSerializer>()
+                                        .AddResourceProducer<DomainName, RandomDomainNameProducer>(
+                                            "RandomDomainGenerator",
+                                            new CronResourceProducerSettings(){ CronSchedule = "*/5 * * * * *" })
+                                        .AddSingleton<IResourceProducerAccessor, ResourceProducerAccessor>()
+                                        .AddSingleton<IPingService, HttpsPingService>();
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var accessor = serviceProvider.GetRequiredService<IResourceProducerAccessor>();
+
+            Console.WriteLine("Press `Ctrl + C` to stop...");
+            Console.WriteLine($"Started at {DateTime.Now.ToString("HH:mm:ss.fff")}");
+            Console.WriteLine("Press `Enter` to exit...");
+
+            using (var subscribe = accessor.GetProducer<DomainName>("RandomDomainGenerator")
+                    .Resource
+                    .Pipeline("Ping pipeline", serviceProvider)
+                    .Task<DomainName, HttpsPingTask>()
+                    .Task<DomainName, PingResultsPrinterTask>().Subscribe())
+            {
+                Console.CancelKeyPress += (s, e) =>
+                {
+                    Console.WriteLine("\nStop executing...");
+                    subscribe.Dispose();
+                    Thread.Sleep(1000);
+                    Environment.Exit(0);
+                };
+
+                Console.ReadLine();
+            }
+        }
+    }
+
+    public class DomainName : Resource<string>
+    {
+        public override string Name => "Random domain name from list";
+
+        public DomainName(string producerHash, string value) : base(producerHash, value)
+        {
+        }
+    }
+
+    public class RandomDomainNameProducer : CronResourceProducer<DomainName>
+    {
+        private readonly string[] _domainNames = new []{"google.com", "github.com"};
+        protected static Random _rand = new Random(DateTime.UtcNow.Millisecond * DateTime.UtcNow.Second * 317);
+
+        // This simulate pull some resource, for example getting sql server free memory
+        public override DomainName PullResource() => new DomainName(Name, _domainNames[_rand.Next(_domainNames.Length)]);
+
+        public RandomDomainNameProducer(string name, CronResourceProducerSettings settings, ISerializer serializer)
+                    : base(name, settings, serializer) { }
+
+        public RandomDomainNameProducer(string name, CronResourceProducerSettings settings, ISerializer serializer, IScheduler scheduler)
+            : base(name, settings, serializer, scheduler) { }
+    }
+    public class HttpsPingTask : IPipelineTask<DomainName>
+    {
+        private readonly IPingService _pingService;
+
+        protected virtual void Log(string str)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine(str);
+            Console.ResetColor();
+        }
+
+        public virtual async Task InvokeAsync(IPipelineContext<DomainName> context, PipelineTaskDelegate<DomainName> nextMiddleware)
+        {
+            string log = $"Ping {context.Resource.Value}...";
+            bool isOk = await _pingService.PingAsync(context.Resource.Value);
+            log += isOk ? "Ok" : "Error";
+            Log(log);
+            context.Items[context.Resource.Value] = isOk;
+            await nextMiddleware(context);
+        }
+
+        public HttpsPingTask(IPingService pingService)
+        {
+            if (pingService == null)
+                throw new ArgumentNullException(nameof(pingService));
+
+            _pingService = pingService;
+        }
+    }
+
+    public class PingResultsPrinterTask : IPipelineTask<DomainName>
+    {
+        private static void WriteColor(string text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.Write(text);
+            Console.ResetColor();
+        }
+
+        private static void WriteStatus(bool status)
+        {
+            if (status)
+                WriteColor("[OK]", ConsoleColor.Green);
+            else
+                WriteColor("[ERROR]", ConsoleColor.Red);
+        }
+
+        public async Task InvokeAsync(IPipelineContext<DomainName> context, PipelineTaskDelegate<DomainName> nextMiddleware)
+        {
+            WriteColor($"Results run at [{DateTime.Now.ToString("HH:mm:ss.fff")}]:\n", ConsoleColor.Cyan);
+            if (context.Resource.Value == "github.com")
+            {
+                Console.Write("Github - ");
+                WriteStatus((bool) context.Items["github.com"]);
+                Console.Write("\n");
+            }
+            if (context.Resource.Value == "google.com")
+            {
+                Console.Write("Google - ");
+                WriteStatus((bool) context.Items["google.com"]);
+                Console.Write("\n");
+            }
+            await nextMiddleware(context);
+        }
+    }
+
+
     public interface IPingService
     {
         Task<bool> PingAsync(string domain);
@@ -14,14 +150,6 @@ namespace Example
     public class HttpsPingService : IPingService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-
-        public HttpsPingService(IHttpClientFactory httpClientFactory)
-        {
-            if (httpClientFactory == null)
-                throw new ArgumentNullException(nameof(httpClientFactory));
-
-            _httpClientFactory = httpClientFactory;
-        }
 
         public async Task<bool> PingAsync(string domain)
         {
@@ -37,126 +165,15 @@ namespace Example
             }
             return !string.IsNullOrEmpty(response);
         }
-    }
 
-    public abstract class HttpsPingTaskBase : IMiddlewareTask
-    {
-        public abstract string Domain { get; }
-
-        protected virtual void Log(string str)
+        public HttpsPingService(IHttpClientFactory httpClientFactory)
         {
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine(str);
-            Console.ResetColor();
-        }
+            if (httpClientFactory == null)
+                throw new ArgumentNullException(nameof(httpClientFactory));
 
-        private readonly IPingService _pingService;
-
-        protected HttpsPingTaskBase(IPingService pingService)
-        {
-            if (pingService == null)
-                throw new ArgumentNullException(nameof(pingService));
-
-            _pingService = pingService;
-        }
-
-        public virtual async Task InvokeAsync(ITaskContext context, TaskDelegate nextMiddleware)
-        {
-            string log = $"Ping {Domain}...";
-            bool isOk = await _pingService.PingAsync(Domain);
-            log += isOk ? "Ok" : "Error";
-            Log(log);
-            context.Items[Domain] = isOk;
-            await nextMiddleware(context);
+            _httpClientFactory = httpClientFactory;
         }
     }
 
-    public class GithubPingTask : HttpsPingTaskBase
-    {
-        public override string Domain => "github.com";
-        public GithubPingTask(IPingService pingService) : base(pingService) { }
 
-    }
-    public class GooglePingTask : HttpsPingTaskBase
-    {
-        public override string Domain => "google.com";
-        public GooglePingTask(IPingService pingService) : base(pingService) { }
-
-    }
-
-    public class PingResultsPrinterTask : IMiddlewareTask
-    {
-        public async Task InvokeAsync(ITaskContext context, TaskDelegate nextMiddleware)
-        {
-            WriteColor($"Results run at [{DateTime.Now.ToLongTimeString()}]:\n", ConsoleColor.Cyan);
-            if(context.Items["github.com"] is bool githubIsOk)
-            {
-                Console.Write("Github - ");
-                WriteStatus(githubIsOk);
-                Console.Write("\n");
-            }
-            if (context.Items["google.com"] is bool googleIsOk)
-            {
-                Console.Write("Google - ");
-                WriteStatus(googleIsOk);
-                Console.Write("\n");
-            }
-            await nextMiddleware(context);
-        }
-
-        private static void WriteStatus(bool status)
-        {
-            if (status)
-                WriteColor("[OK]", ConsoleColor.Green);
-            else
-                WriteColor("[ERROR]", ConsoleColor.Red);
-        }
-
-        private static void WriteColor(string text, ConsoleColor color)
-        {
-            Console.ForegroundColor = color;
-            Console.Write(text);
-            Console.ResetColor();
-        }
-    }
-
-    class Program
-    {
-
-
-        public static async Task Main(string[] args)
-        {
-
-            var serviceCollection = new ServiceCollection()
-                                        .AddHttpClient()
-                                        .AddSingleton<IPingService, HttpsPingService>();
-
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            var builder = new CuratorConfigurationBuilder().UseServiceProvider(serviceProvider);
-            builder.AddPipeline("PingPipeline")
-                .WithSchedule("*/5 * * * * *")
-                .Task<GithubPingTask>()
-                .Task<GooglePingTask>()
-                .Task<PingResultsPrinterTask>();
-
-            var cts = new CancellationTokenSource();
-
-            Console.CancelKeyPress += (s, e) => {
-                Console.WriteLine("\nStop executing...");
-                cts.Cancel();
-                Thread.Sleep(1000);
-                 Environment.Exit(0);
-                
-            };
-            Console.WriteLine("Press `Ctrl + C` to stop...");
-            Console.WriteLine($"Next run at {DateTime.Now.AddSeconds(5).ToLongTimeString()}");
-
-            using (ICurator overseer = new Curator(builder.Build()))
-                await overseer.StartAsync(cts.Token).ConfigureAwait(false);
-
-            Console.WriteLine("Press `Enter` to exit...");
-            Console.ReadLine();
-        }
-    }
 }
