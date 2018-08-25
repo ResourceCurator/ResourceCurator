@@ -1,6 +1,6 @@
 # Resource Curator
 
-![logo](.\docs\img\logo_text_128.png)
+![logo](https://raw.githubusercontent.com/ResourceCurator/ResourceCurator/master/docs/img/logo_text_128.png)
 
 ## Introduction
 
