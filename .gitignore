@@ -1,3 +1,10 @@
+# Cake / Use `dotnet tool install -g Cake.Tool && dotnet cake`
+# Unused bootstrapers
+build.ps1
+build.sh
+# Cake tools
+tools/
+
 /Properties/launchSettings.json
 
 ## Ignore Visual Studio temporary files, build results, and

@@ -1,0 +1,15 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+image: Visual Studio 2017 Preview
+configuration: Release
+artifacts:
+- path: build/artifacts/*.nupkg
+- path: '**/*.binlog'
+on_failure:
+- ps: Get-ChildItem *.binlog -recurse | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+build_script:
+- cmd: dotnet tool install -g Cake.Tool
+- cmd: dotnet cake build.cake --target=Rebuild
+test_script:
+- cmd: dotnet cake build.cake --target=RunTests
