@@ -2,9 +2,16 @@
 // TOOLS AND ADDIN
 ///////////////////////////////////////////////////////////////////////////////
 #tool "nuget:?package=xunit.runner.console"
-#tool "nuget:?package=gitlink"
 
+#tool nuget:?package=gitlink
 #addin nuget:?package=Cake.Git
+
+#addin nuget:?package=coverlet.msbuild
+#addin nuget:?package=Cake.Coverlet
+// codecov.io
+#tool nuget:?package=Codecov
+#addin nuget:?package=Cake.Codecov
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -109,6 +116,44 @@ Task("RunTests").Does(() => {
         });
     }
 
+});
+
+Task("Coverage").Does(() => {
+    var tests = GetFiles("*/*.Tests.csproj");
+    foreach(var test in tests)
+    {
+        Information($"Start tests with coverlet on project {test.GetFilenameWithoutExtension()}");
+
+        var coverageFile = test.GetFilenameWithoutExtension() + ".opencover.xml";
+        var coveragePath = "./build/artifacts/coverage/";
+        DotNetCoreTest(test.FullPath, new DotNetCoreTestSettings()
+        {
+            Configuration = "Debug",
+            Verbosity = DotNetCoreVerbosity.Minimal,
+            NoBuild = false,
+            NoRestore = false,
+            ResultsDirectory = $"./build/artifacts/tests/",
+            // dotnet test has only TRX logger, we add xunit xml logger from XunitXml.TestLogger package
+            // https://github.com/xunit/xunit/issues/1154
+            // can't use full path because https://github.com/spekt/xunit.testlogger/pull/4
+            Logger = $"xunit;LogFilePath=./../build/artifacts/tests/{test.GetFilenameWithoutExtension()}.xml",
+            TestAdapterPath = test.GetDirectory(),
+            //DiagnosticOutput = false,
+            //DiagnosticFile = $"./build/artifacts/tests/{test.GetFilenameWithoutExtension()}_diag.xml",
+        }, 
+        // Don't forget add 
+        // <PackageReference Include="coverlet.msbuild" />
+        // to csproj with tests
+        new CoverletSettings()
+        {
+            CollectCoverage = true,
+            CoverletOutputFormat = CoverletOutputFormat.opencover,
+            CoverletOutputDirectory = Directory(coveragePath),
+            CoverletOutputName = coverageFile,
+        });
+
+        Codecov(System.IO.Path.Combine(coveragePath, coverageFile), "35d84299-29d7-410b-b9c4-9d3c87d54b24");
+    }
 });
 
 Task("Default").IsDependentOn("Rebuild");

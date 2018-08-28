@@ -4,12 +4,15 @@ pull_requests:
 image: Visual Studio 2017 Preview
 configuration: Release
 artifacts:
-- path: build/artifacts/*.nupkg
+- path: ./build/artifacts/**/*
 - path: '**/*.binlog'
 on_failure:
 - ps: Get-ChildItem *.binlog -recurse | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
 build_script:
 - cmd: dotnet tool install -g Cake.Tool
+# Usefull tools but not used as is
+#- cmd: dotnet tool install -g dotnet-reportgenerator-globaltool
+- cmd: dotnet tool install -g coverlet.console
 - cmd: dotnet cake build.cake --target=Rebuild
 test_script:
-- cmd: dotnet cake build.cake --target=RunTests
+- cmd: dotnet cake build.cake --target=Coverage
