@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ResourceCurator.Core\ResourceCurator.Core.csproj" />
+    <ProjectReference Include="..\..\ResourceCurator.Abstractions\ResourceCurator.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Serialization\Yaml\ResourceCurator.Serialization.Yaml.csproj" />
   </ItemGroup>
 
 </Project>

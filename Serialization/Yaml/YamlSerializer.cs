@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using YamlDotNet.Serialization;
+using ResourceCurator;
 
-namespace ResourceCurator
+namespace ResourceCurator.Serialization.Yaml
 {
     public class YamlSerializer : ISerializer
     {

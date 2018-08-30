@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ResourceCurator;
 using ObservableExtensions = ResourceCurator.ObservableExtensions;
+using ResourceCurator.Serialization.Yaml;
 
 namespace Example
 {
