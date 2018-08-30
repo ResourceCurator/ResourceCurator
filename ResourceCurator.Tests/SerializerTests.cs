@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ResourceCurator.Serialization.Yaml;
 using Xunit;
 
 namespace ResourceCurator.Tests

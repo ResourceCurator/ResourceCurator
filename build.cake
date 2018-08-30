@@ -24,6 +24,7 @@ var configuration = Argument("configuration", "Release");
 // GLOBAL VARS
 ///////////////////////////////////////////////////////////////////////////////
 var solution = File("./ResourceCurator.sln");
+var examplesSolution = File("./Examples/Examples.sln");
 var lastCommit = GitLogTip("./");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,19 +63,15 @@ Teardown(ctx =>
 
 Task("Clean").Does(() =>
 {
-    CleanDirectories(string.Format("./build", configuration));
-    DotNetCoreClean(solution, new DotNetCoreCleanSettings()
-    {
-        Verbosity = DotNetCoreVerbosity.Minimal,
-    });
+    CleanDirectories("./build");
+    DotNetCoreClean(solution, new DotNetCoreCleanSettings() { Verbosity = DotNetCoreVerbosity.Minimal,});
+    DotNetCoreClean(examplesSolution, new DotNetCoreCleanSettings() { Verbosity = DotNetCoreVerbosity.Minimal,});
 });
 
 Task("Restore").Does(() =>
 {
-    DotNetCoreRestore(new DotNetCoreRestoreSettings()
-    {
-        Verbosity = DotNetCoreVerbosity.Minimal,
-    });
+    DotNetCoreRestore();
+    DotNetCoreRestore("./Examples");
     
 });
 
@@ -88,9 +85,18 @@ Task("Build").Does(() => {
     { 
         Configuration = configuration,
         Verbosity = DotNetCoreVerbosity.Minimal,
+        // vs code problemMatcher workaround
+        ArgumentCustomization = args => args.Append("/p:GenerateFullPaths=true"),
     });
-
-
+});
+Task("BuildExamples").Does(() => {
+    DotNetCoreBuild(examplesSolution,  new DotNetCoreBuildSettings() 
+    { 
+        Configuration = configuration,
+        Verbosity = DotNetCoreVerbosity.Minimal,
+        // vs code problemMatcher workaround
+        ArgumentCustomization = args => args.Append("/p:GenerateFullPaths=true"),
+    });
 });
 Task("RunTests").Does(() => {
     var tests = GetFiles("*/*.Tests.csproj");

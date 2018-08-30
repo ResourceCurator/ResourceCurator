@@ -34,9 +34,10 @@ obj/
 Obj/
 tmp/
 
-# Visual Studio 2015 cache/options directory
+# Visual Studio/Rider cache/options directory
 .vs/
 .vscode/
+.idea
 /wwwroot/dist/
 /ClientApp/dist/
 
