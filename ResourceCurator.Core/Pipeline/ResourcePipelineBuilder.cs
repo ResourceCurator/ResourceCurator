@@ -42,7 +42,7 @@ namespace ResourceCurator
             var pipeline = _pipeline.Build();
             var scheduler = _scope.ServiceProvider.GetRequiredService<IScheduler>();
             // onNext is void, so our async lambda is bad,
-            // we just use SelectMany for async logic here, but in future we can do more:
+            // we can use Select().Concat() or SelectMany for async logic
             // ToDo: add overrides for concurrent execution N resources (via SelectMany)
             // More info:
             // https://github.com/dotnet/reactive/issues/459#issuecomment-357648243

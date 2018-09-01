@@ -9,6 +9,7 @@
     <AssemblyName>ResourceCurator</AssemblyName>
     <Company>ResourceCurator</Company>
     <ApplicationIcon>../docs/img/icon.ico</ApplicationIcon>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Cronos" Version="0.6.3" />

@@ -32,8 +32,13 @@ namespace Example
             var accessor = serviceProvider.GetRequiredService<IResourceProducerAccessor>();
 
             Console.WriteLine("Press `Ctrl + C` to stop...");
-            Console.WriteLine($"Started at {DateTime.Now.ToString("HH:mm:ss.fff")}");
+            Console.WriteLine($"Started at {DateTime.Now:HH:mm:ss.fff}");
             Console.WriteLine("Press `Enter` to exit...");
+            Console.CancelKeyPress += (s, e) =>
+            {
+                Console.WriteLine("\nStop executing...");
+                Environment.Exit(0);
+            };
 
             using (var subscribe = accessor.GetProducer<DomainName>("RandomDomainGenerator")
                     .Resource
@@ -41,14 +46,6 @@ namespace Example
                     .Task<DomainName, HttpsPingTask>()
                     .Task<DomainName, PingResultsPrinterTask>().Subscribe())
             {
-                Console.CancelKeyPress += (s, e) =>
-                {
-                    Console.WriteLine("\nStop executing...");
-                    subscribe.Dispose();
-                    Thread.Sleep(1000);
-                    Environment.Exit(0);
-                };
-
                 Console.ReadLine();
             }
         }
@@ -126,7 +123,7 @@ namespace Example
 
         public async Task InvokeAsync(IPipelineContext<DomainName> context, PipelineTaskDelegate<DomainName> nextMiddleware)
         {
-            WriteColor($"Results run at [{DateTime.Now.ToString("HH:mm:ss.fff")}]:\n", ConsoleColor.Cyan);
+            WriteColor($"Results run at [{DateTime.Now:HH:mm:ss.fff}]:\n", ConsoleColor.Cyan);
             if (context.Resource.Value == "github.com")
             {
                 Console.Write("Github - ");

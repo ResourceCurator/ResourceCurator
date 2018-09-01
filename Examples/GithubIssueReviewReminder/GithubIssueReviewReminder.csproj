@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Connectors\Github\ResourceCurator.Github.csproj" />
+    <ProjectReference Include="..\..\ResourceCurator.Abstractions\ResourceCurator.Abstractions.csproj" />
+    <ProjectReference Include="..\..\ResourceCurator.Core\ResourceCurator.Core.csproj" />
+    <ProjectReference Include="..\..\Serialization\Yaml\ResourceCurator.Serialization.Yaml.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0-preview1-35029" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0-preview1-35029" />
+    <PackageReference Include="Refit" Version="4.6.30" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="4.6.30" />
+    <PackageReference Include="Serilog" Version="2.7.2-dev-01024" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.2-dev-00777" />
+    <PackageReference Include="System.Reactive" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0-preview1-35029" />
+  </ItemGroup>
+ 
+  
+</Project>
