@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ResourceCurator</RootNamespace>
@@ -8,6 +8,7 @@
     <AssemblyName>ResourceCurator.Abstractions</AssemblyName>
     <Company>ResourceCurator</Company>
     <ApplicationIcon>../docs/img/icon.ico</ApplicationIcon>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Reactive" Version="4.1.0" />

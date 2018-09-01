@@ -12,10 +12,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0-preview1-35029" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0-preview1-35029" />
+    <PackageReference Include="Refit" Version="4.6.30" />
     <PackageReference Include="System.Reactive" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../ResourceCurator.Abstractions/ResourceCurator.Abstractions.csproj" />
+    <ProjectReference Include="../../ResourceCurator.Abstractions/ResourceCurator.Abstractions.csproj" />
+    <ProjectReference Include="..\..\ResourceCurator.Core\ResourceCurator.Core.csproj" />
   </ItemGroup>
 
 

@@ -24,7 +24,6 @@ var configuration = Argument("configuration", "Release");
 // GLOBAL VARS
 ///////////////////////////////////////////////////////////////////////////////
 var solution = File("./ResourceCurator.sln");
-var examplesSolution = File("./Examples/Examples.sln");
 var lastCommit = GitLogTip("./");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,13 +64,11 @@ Task("Clean").Does(() =>
 {
     CleanDirectories("./build");
     DotNetCoreClean(solution, new DotNetCoreCleanSettings() { Verbosity = DotNetCoreVerbosity.Minimal,});
-    DotNetCoreClean(examplesSolution, new DotNetCoreCleanSettings() { Verbosity = DotNetCoreVerbosity.Minimal,});
 });
 
 Task("Restore").Does(() =>
 {
     DotNetCoreRestore();
-    DotNetCoreRestore("./Examples");
     
 });
 
@@ -82,15 +79,6 @@ Task("Rebuild")
 
 Task("Build").Does(() => {
     DotNetCoreBuild(solution,  new DotNetCoreBuildSettings() 
-    { 
-        Configuration = configuration,
-        Verbosity = DotNetCoreVerbosity.Minimal,
-        // vs code problemMatcher workaround
-        ArgumentCustomization = args => args.Append("/p:GenerateFullPaths=true"),
-    });
-});
-Task("BuildExamples").Does(() => {
-    DotNetCoreBuild(examplesSolution,  new DotNetCoreBuildSettings() 
     { 
         Configuration = configuration,
         Verbosity = DotNetCoreVerbosity.Minimal,
