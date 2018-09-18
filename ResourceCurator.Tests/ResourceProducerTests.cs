@@ -11,8 +11,8 @@ namespace ResourceCurator.Tests
         [Fact]
         public void Ctor()
         {
-            var name = "Test";
-            var resource1 = new FakeResourceProducer("Test");
+            var name = "Test1";
+            var resource1 = new FakeResourceProducer("Test1");
             var resource2 = new FakeResourceProducer("Test2");
 
             Assert.Equal(resource1.Name, name);
@@ -24,7 +24,7 @@ namespace ResourceCurator.Tests
         [Fact]
         public void HashBytes()
         {
-            var resource1 = new FakeResourceProducer("Test");
+            var resource1 = new FakeResourceProducer("Test1");
             var resource2 = new FakeResourceProducer("Test2");
 
             var a1 = resource1.HashBytes();

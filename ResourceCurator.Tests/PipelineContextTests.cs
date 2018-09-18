@@ -12,14 +12,20 @@ namespace ResourceCurator.Tests
         public void Ctor()
         {
             var service = A.Fake<IServiceProvider>();
-            var resource = A.Fake<FakeIResource>();
+            var resource = A.Fake<PipelineContextFakeResource>();
 
-            var pipelineContext = new PipelineContext<FakeIResource>(service, resource);
+            var pipelineContext = new PipelineContext<PipelineContextFakeResource>(service, resource);
 
             Assert.Equal(service, pipelineContext.Services);
             Assert.Equal(resource, pipelineContext.Resource);
 
-
         }        
+    }
+
+    public class PipelineContextFakeResource : IResource
+    {
+        public string Name { get; internal set; }
+        public string ProducerHash { get; internal set; }
+        public object UntypedValue { get; internal set; }
     }
 }

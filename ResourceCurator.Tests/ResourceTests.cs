@@ -11,9 +11,9 @@ namespace ResourceCurator.Tests
         [Fact]
         public void Ctor()
         {
-            var res1 = new Res("", 0);
-            var res2 = new Res("", 0);
-            var res3 = new Res("", 1);
+            var res1 = new FakeResource("", 0);
+            var res2 = new FakeResource("", 0);
+            var res3 = new FakeResource("", 1);
 
             Assert.True(res1.Equals(res2));
             Assert.True(res1.GetHashCode() == res2.GetHashCode());
@@ -22,11 +22,11 @@ namespace ResourceCurator.Tests
             Assert.True(res1 != res3);
         }
         
-        class Res : Resource<int>
+        class FakeResource : Resource<int>
         {
             public override string Name => "";
 
-            public Res(string producerHash, int value) : base(producerHash, value)
+            public FakeResource(string producerHash, int value) : base(producerHash, value)
             {
             }
         }

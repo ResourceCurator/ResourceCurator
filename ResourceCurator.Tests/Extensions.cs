@@ -25,14 +25,18 @@ namespace ResourceCurator.Tests
         [Fact]
         public void AsList()
         {
-            IEnumerable<int> result = from value in Enumerable.Range(0, 2)
-                                      select value;
+            IEnumerable<int> checkOnList = from value in Enumerable.Range(0, 2) select value;
+            var listAlready = new List<int>();
 
-            var a = result.GetType();
-            var b = result.AsList<int>().GetType();
+            var a = checkOnList;                  // unknown type
+            var b = checkOnList.AsList<int>();    // convert to list
+            var c = listAlready.AsList<int>();    // already list
 
-            Assert.False(a == typeof(List<int>) );
-            Assert.True(b == typeof(List<int>));
+            Assert.False(a.GetType() == typeof(List<int>)); // "a" isn't List
+            Assert.True( b.GetType() == typeof(List<int>)); // "b" has been converted to List
+            Assert.True( c.GetType() == typeof(List<int>)); // "c" is already List
+            Assert.False(b == checkOnList);                 // "b" points to the new object
+            Assert.True( c == listAlready);                 // "c" points to the same object
         }
     }
 }
