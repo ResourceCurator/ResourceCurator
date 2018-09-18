@@ -27,7 +27,7 @@ namespace ResourceCurator
         /// <param name="name">Some self-description name of resource producer, must be unique in type</param>
         protected ResourceProducer(string name) => Name = name ?? throw new ArgumentNullException(nameof(name));
 
-        protected virtual string ComputeHash()
+        protected internal virtual string ComputeHash()
         {
             var encoding = Encoding.UTF8;
             using (var hashFunc = HashAlgorithm.Create("System.Security.Cryptography.SHA256"))
@@ -42,7 +42,7 @@ namespace ResourceCurator
 
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected virtual byte[] HashBytes() => Encoding.UTF8.GetBytes(GetType().FullName + Name);
+        protected internal virtual byte[] HashBytes() => Encoding.UTF8.GetBytes(GetType().FullName + Name);
 
         [DebuggerStepThrough]
         public override string ToString() => $"{Name} [{Hash}]";
@@ -74,7 +74,7 @@ namespace ResourceCurator
             _serializedSettings = _serializer.SerializeToString(settings);
         }
 
-        protected override byte[] HashBytes() => Encoding.UTF8.GetBytes(GetType().FullName + Name + _serializedSettings);
+        protected internal override byte[] HashBytes() => Encoding.UTF8.GetBytes(GetType().FullName + Name + _serializedSettings);
     }
 
 }
